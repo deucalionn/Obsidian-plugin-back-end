@@ -2,12 +2,14 @@ use rocket::{get, options, post, routes, serde::json::Json};
 use dotenv::dotenv;
 use serde_json::json;
 
-use crate::models::{ObsidianFile, NewObsidianFile, create_obsidian_file_in_db, get_obsidian_file_by_id, update_or_create_obsidian_file_by_name};
+mod routes;
 mod models;
 mod db;
 mod schema;
 mod cors;
 
+use routes::obsidian::update_or_create_obsidian_file_by_name;
+use models::obsidian::{ObsidianFile, NewObsidianFile, create_obsidian_file_in_db, get_obsidian_file_by_id};
 use cors::CORS;
 
 
