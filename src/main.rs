@@ -1,6 +1,4 @@
-#[macro_use] extern crate rocket;
-extern crate diesel;
-use rocket::serde::json::Json;
+use rocket::{get, options, post, routes, serde::json::Json};
 use dotenv::dotenv;
 use serde_json::json;
 
@@ -31,7 +29,7 @@ async fn create_obsidian_file(obsidian_file:Json<NewObsidianFile>) -> Json<Obsid
 async fn update_obsidian_file(file_name: String, new_content: String) -> Result<Json<ObsidianFile>, Json<serde_json::Value>> {
     let pool = db::get_connection_pool();
     let mut conn = pool.get().expect("Could not get connection from pool");
-    let result = update_or_create_obsidian_file_by_name(&mut conn, file_name, new_content);
+    let result = update_or_create_obsidian_file_by_name(&mut conn, file_name, new_content).await;
     match result {
         Some(file) => Ok(Json(file)),
         None => Err(Json(json!({"error": "not found"}))),
