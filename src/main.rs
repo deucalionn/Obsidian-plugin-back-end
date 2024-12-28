@@ -7,9 +7,11 @@ mod models;
 mod db;
 mod schema;
 mod cors;
+mod rag;
 
 use routes::obsidian::update_or_create_obsidian_file_by_name;
 use models::obsidian::{ObsidianFile, NewObsidianFile, create_obsidian_file_in_db, get_obsidian_file_by_id};
+use rag::rag::search_in_note;
 use cors::CORS;
 
 
@@ -51,6 +53,14 @@ async fn get_obsidian_file(file_id: i32) -> Result<Json<ObsidianFile>, Json<serd
 }
 
 
+#[post("/question", data = "<question>")]
+async fn ask_question(question: Json<serde_json::Value>) -> Json<serde_json::Value> {
+    let question = question.into_inner();
+    let question = question["question"].as_str().unwrap();
+    let response = search_in_note(question.to_string()).await;
+    Json(json!({"response": response}))
+}
+
 
 #[rocket::main]
 async fn main() {
@@ -58,7 +68,7 @@ async fn main() {
 
     rocket::build()
         .attach(CORS)
-        .mount("/", routes![create_obsidian_file, get_obsidian_file, update_obsidian_file, options])
+        .mount("/", routes![create_obsidian_file, get_obsidian_file, update_obsidian_file, ask_question, options])
         .launch()
         .await
         .expect("server failed to launch");
